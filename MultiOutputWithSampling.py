@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.base import clone
 
 
-class MultipleSingleTask:
+class MultiOutputWithSampling:
     def __init__(self, model):
         self.model = model
         self.list_ = None
