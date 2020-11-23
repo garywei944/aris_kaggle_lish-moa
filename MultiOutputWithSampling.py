@@ -11,10 +11,13 @@ import sys
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 
-def _mp_fit(model, X_train, y_train, id_, i):
+def _mp_fit(id_, i):
+    model, X_train, y_train = pickle.load(open('arg_{}.pkl'.format(id_), 'rb'))
+    os.remove('arg_{}.pkl'.format(id_))
     logging.debug("Start to fit label {}".format(i))
     model.fit(X_train, y_train)
     pickle.dump(model, open(Path('mp_{}.pkl'.format(id_)), 'wb'))
+    logging.debug("Finished fitting label {}".format(i))
 
 
 class MultiOutputWithSampling:
@@ -30,7 +33,8 @@ class MultiOutputWithSampling:
         for i in range(v):
             model_ = clone(self.model)
             ids.append("{}_{}".format(i, id(model_)))
-            process = Process(target=_mp_fit, args=(model_, X_train, y_train[:, i], ids[i], i))
+            pickle.dump((model_, X_train, y_train[:, i]), open('arg_{}.pkl'.format(ids[i]), 'wb'))
+            process = Process(target=_mp_fit, args=(ids[i], i))
             record.append(process)
             process.start()
 
