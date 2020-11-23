@@ -16,7 +16,8 @@ def main():
     train_features, test_features = pca(X_train, X_test)
 
     # Linear Model
-    eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train)
+    eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train,
+               id_='lr_no_sampling')
 
 
 if __name__ == '__main__':
