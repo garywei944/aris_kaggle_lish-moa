@@ -5,7 +5,7 @@ import logging
 import sys
 
 from sklearn.linear_model import LogisticRegression
-from sklearn.multiclass import OneVsRestClassifier
+from sklearn.multioutput import MultiOutputClassifier
 
 from preprocess import load_and_process, pca
 from metrics import eval_model
@@ -16,9 +16,10 @@ def main():
     train_features, test_features = pca(X_train, X_test)
 
     # Linear Model
-    eval_model(OneVsRestClassifier(LogisticRegression()), train_features, y_train)
+    eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train)
 
 
 if __name__ == '__main__':
     logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+
     main()

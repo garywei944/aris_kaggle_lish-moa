@@ -29,7 +29,7 @@ def pca(X_train, X_test):
     cells = [col for col in X_train.columns if col.startswith('c-')]
 
     # PCA genes
-    n_comp = 500
+    n_comp = 200
 
     data_genes = pd.concat([pd.DataFrame(X_train[genes]), pd.DataFrame(X_test[genes])])
     data_genes_pca = PCA(n_components=n_comp, random_state=42).fit_transform(data_genes)

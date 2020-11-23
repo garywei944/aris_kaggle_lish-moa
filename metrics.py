@@ -1,3 +1,6 @@
+import numpy as np
+import pandas as pd
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.model_selection import KFold
@@ -8,22 +11,22 @@ from time import time
 
 def avg_log_loss(y_true, y_pred):
     r = 0.0
-    v = y_pred.shape[1]
+
+    # Add a dummy prediction to y_true and y_pred in case some label has all 0's
+    y_true = np.vstack((y_true, np.ones((1, y_true.shape[1]))))
+    y_pred = np.vstack((y_pred, np.ones((1, y_pred.shape[1]))))
+
+    v = y_true.shape[1]
     for i in range(v):
-        r += f1_score(y_true.iloc[:, i], y_pred[:, i])
+        r += log_loss(y_true[:, i], y_pred[:, i])
     return r / v
 
 
-def eval_model(model, X_train, y_train):
-    def warn():
-        pass
-
-    import warnings
-    warnings.warn = warn
-
+def eval_model(model, X_train, y_train, id_=None):
     start_time = time()
     print('*' * 20)
     print("Evaluating model {}".format(model))
+
     kf = KFold(n_splits=3)
     kf.get_n_splits(X_train)
 
@@ -32,9 +35,13 @@ def eval_model(model, X_train, y_train):
         X_train_, X_val_ = X_train.iloc[train_index], X_train.iloc[test_index]
         y_train_, y_val_ = y_train.iloc[train_index], y_train.iloc[test_index]
 
+        # Add dummy sample to make sure every column has 2 labels
+        X_train_ = np.vstack((X_train_.values, np.zeros((1, X_train_.shape[1]))))
+        y_train_ = np.vstack((y_train_.values, np.ones((1, y_train_.shape[1]))))
+
         model.fit(X_train_, y_train_)
         y_pred_ = model.predict(X_val_)
-        score += avg_log_loss(y_pred_, y_train_)
+        score += avg_log_loss(y_pred_, y_val_)
         break
     print("The Average Log Loss is {}".format(score))
     print("Used {:2f}s".format(time() - start_time))

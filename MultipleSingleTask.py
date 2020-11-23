@@ -11,7 +11,7 @@ class MultipleSingleTask:
         v = y_train.shape[1]
         self.list_ = [clone(self.model) for _ in range(v)]
         for i in range(v):
-            self.list_[i].fit(X_train, y_train.iloc[:, i])
+            self.list_[i].fit(X_train, y_train[:, i])
 
     def predict(self, X_test):
         n = X_test.shape[0]
