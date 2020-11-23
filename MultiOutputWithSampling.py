@@ -3,7 +3,7 @@ from sklearn.base import clone
 
 import logging
 import pickle
-from multiprocessing import Process
+from multiprocessing import Process, Pool
 from pathlib import Path
 import os
 import sys
@@ -11,7 +11,8 @@ import sys
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 
-def _mp_fit(id_, i):
+def _mp_fit(*args, **kwargs):
+    id_, i = args[0]
     model, X_train, y_train = pickle.load(open('arg_{}.pkl'.format(id_), 'rb'))
     os.remove('arg_{}.pkl'.format(id_))
     logging.debug("Start to fit label {}".format(i))
@@ -34,12 +35,11 @@ class MultiOutputWithSampling:
             model_ = clone(self.model)
             ids.append("{}_{}".format(i, id(model_)))
             pickle.dump((model_, X_train, y_train[:, i]), open('arg_{}.pkl'.format(ids[i]), 'wb'))
-            process = Process(target=_mp_fit, args=(ids[i], i))
-            record.append(process)
-            process.start()
 
-        for process in record:
-            process.join()
+        pool = Pool(None)
+        pool.map(_mp_fit, zip(ids, range(v)))
+        pool.close()
+        pool.join()
 
         self.list_ = [None for _ in range(v)]
         for i in range(v):
