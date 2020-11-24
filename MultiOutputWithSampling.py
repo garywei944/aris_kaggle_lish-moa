@@ -23,7 +23,7 @@ def _mp_fit(*args, **kwargs):
     logging.debug("Finished fitting label {}".format(i))
 
 
-def _over_sampling(X_train, y_train):
+def _over_sampling(X_train, y_train, sampling_strategy=0.2):
     # Failed but don't know why
     # # Oversampling so that #0:#1 = 1:4
     # n_neighbors = 5
@@ -48,15 +48,16 @@ def _over_sampling(X_train, y_train):
         # logging.debug(y_train)
         y_train = np.hstack((y_train, np.ones(6)))
 
-    oversample = SMOTE(n_jobs=-1)
+    oversample = SMOTE(sampling_strategy=sampling_strategy, n_jobs=-1)
     X, y = oversample.fit_resample(X_train, y_train)
     return X, y
 
 
 class MultiOutputWithSampling:
-    def __init__(self, model):
+    def __init__(self, model, sampling_strategy=0.2):
         self.model = model
         self.list_ = None
+        self.sampling_strategy = sampling_strategy
 
     def fit(self, X_train, y_train):
         v = y_train.shape[1]
@@ -67,7 +68,7 @@ class MultiOutputWithSampling:
             model_ = clone(self.model)
             ids.append("{}_{}".format(i, id(model_)))
             # logging.debug("sampling {}".format(i))
-            X, y = _over_sampling(X_train, y_train[:, i])
+            X, y = _over_sampling(X_train, y_train[:, i], self.sampling_strategy)
             pickle.dump((model_, X, y), open('arg_{}.pkl'.format(ids[i]), 'wb'))
 
         pool = Pool(None)

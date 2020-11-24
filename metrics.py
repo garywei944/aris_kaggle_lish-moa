@@ -30,7 +30,7 @@ def scorer(y_true, y_pred):
 def eval_model(model, X_train, y_train, id_=None):
     start_time = time()
     print('*' * 20)
-    print("Evaluating model {}".format(model))
+    print("Evaluating model {}".format(id_ if id_ else model))
 
     n_splits = 1
     output = None
