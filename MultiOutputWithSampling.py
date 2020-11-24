@@ -7,8 +7,9 @@ from multiprocessing import Process, Pool
 from pathlib import Path
 import os
 import sys
+from config import config
 
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+config()
 
 
 def _mp_fit(*args, **kwargs):

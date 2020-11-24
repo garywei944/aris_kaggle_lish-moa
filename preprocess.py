@@ -3,7 +3,11 @@ import numpy as np
 
 from sklearn.decomposition import PCA
 
+from MLSMOTE import MLSMOTE
+
 import logging
+from os import path
+import pickle
 
 
 def preprocess(df):
@@ -56,3 +60,12 @@ def pca(X_train, X_test):
     train_features = pd.concat((train_gene_pca, train_cells_pca), axis=1)
     test_features = pd.concat((test_gene_pca, test_cells_pca), axis=1)
     return train_features, test_features
+
+
+def mlsmote(X_train, y_train, n_sample, neigh=5):
+    if path.exists('over_sampling.pkl'):
+        return pickle.load(open('over_sampling.pkl', 'rb'))
+    else:
+        X_train_os, y_train_os = MLSMOTE(X_train, y_train, X_train.shape[0])
+        pickle.dump((X_train_os, y_train_os), open('over_sampling.pkl', 'wb'))
+        return X_train_os, y_train_os

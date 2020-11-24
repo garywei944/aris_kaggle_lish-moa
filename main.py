@@ -3,12 +3,13 @@ import numpy as np
 
 import logging
 import sys
+from config import config
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
 
-from preprocess import load_and_process, pca
+from preprocess import load_and_process, pca, mlsmote
 from metrics import eval_model
 from MultiOutputWithSampling import MultiOutputWithSampling
 
@@ -26,8 +27,12 @@ def main():
         RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)), train_features,
         y_train, id_='rf_200_10_43_10_no_sampling')
 
+    # Oversampling on the entire dataset with MLSMOTE
+    X_train_os, y_train_os = mlsmote(train_features, y_train, train_features.shape[0])
+    eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), X_train_os, y_train_os,
+               id_='lr_complete_sampling')
+
 
 if __name__ == '__main__':
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-
+    config()
     main()

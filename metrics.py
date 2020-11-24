@@ -32,7 +32,7 @@ def eval_model(model, X_train, y_train, id_=None):
     print('*' * 20)
     print("Evaluating model {}".format(model))
 
-    n_splits = 3
+    n_splits = 1
     output = None
     if id_:
         output = Path('output') / id_
@@ -44,7 +44,7 @@ def eval_model(model, X_train, y_train, id_=None):
             print("The Average f1 is {}".format(f1))
             return log_loss_, auc, f1
 
-    kf = KFold(n_splits=n_splits)
+    kf = KFold(n_splits=3)
     kf.get_n_splits(X_train)
 
     log_loss_, auc, f1 = 0.0, 0.0, 0.0
@@ -64,6 +64,7 @@ def eval_model(model, X_train, y_train, id_=None):
         log_loss_ += log_loss_val
         auc += auc_val
         f1 += f1_val
+        break
 
     log_loss_ /= n_splits
     auc /= n_splits
