@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.base import clone
+from imblearn.over_sampling import SMOTE
 
 import logging
 import pickle
@@ -22,6 +23,36 @@ def _mp_fit(*args, **kwargs):
     logging.debug("Finished fitting label {}".format(i))
 
 
+def _over_sampling(X_train, y_train):
+    # Failed but don't know why
+    # # Oversampling so that #0:#1 = 1:4
+    # n_neighbors = 5
+    #
+    # # Decrease n_neighbors if there is no enough samplings
+    # while n_neighbors > 0:
+    #     # logging.debug("Enter while")
+    #     try:
+    #         oversample = SMOTE(sampling_strategy=0.25, k_neighbors=n_neighbors, n_jobs=-1)
+    #         X, y = oversample.fit_resample(X_train, y_train)
+    #     except ValueError:
+    #         logging.debug(n_neighbors)
+    #         n_neighbors -= 2
+    #     else:
+    #         return X, y
+
+    # Copy the first sample with label=1 6 times
+    if np.sum(y_train) < 6:
+        index = np.where(y_train == 1)[0][0]
+        x_ = X_train[index]
+        X_train = np.vstack((X_train, [x_ for _ in range(6)]))
+        # logging.debug(y_train)
+        y_train = np.hstack((y_train, np.ones(6)))
+
+    oversample = SMOTE(n_jobs=-1)
+    X, y = oversample.fit_resample(X_train, y_train)
+    return X, y
+
+
 class MultiOutputWithSampling:
     def __init__(self, model):
         self.model = model
@@ -35,7 +66,9 @@ class MultiOutputWithSampling:
         for i in range(v):
             model_ = clone(self.model)
             ids.append("{}_{}".format(i, id(model_)))
-            pickle.dump((model_, X_train, y_train[:, i]), open('arg_{}.pkl'.format(ids[i]), 'wb'))
+            # logging.debug("sampling {}".format(i))
+            X, y = _over_sampling(X_train, y_train[:, i])
+            pickle.dump((model_, X, y), open('arg_{}.pkl'.format(ids[i]), 'wb'))
 
         pool = Pool(None)
         pool.map(_mp_fit, zip(ids, range(v)))

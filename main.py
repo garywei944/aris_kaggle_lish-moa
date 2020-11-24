@@ -22,15 +22,16 @@ def main():
     eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train,
                id_='lr_no_sampling')
     eval_model(MultiOutputWithSampling(LogisticRegression(max_iter=1e4)), train_features,
-               y_train, id_='demo_lr')
+               y_train, id_='lr_separate_sampling')
     eval_model(MultiOutputWithSampling(
         RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)), train_features,
         y_train, id_='rf_200_10_43_10_no_sampling')
 
-    # Oversampling on the entire dataset with MLSMOTE
-    X_train_os, y_train_os = mlsmote(train_features, y_train, train_features.shape[0])
-    eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), X_train_os, y_train_os,
-               id_='lr_complete_sampling')
+    # Failed since the generated data only contains label 0
+    # # Oversampling on the entire dataset with MLSMOTE
+    # X_train_os, y_train_os = mlsmote(train_features, y_train, train_features.shape[0])
+    # eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), X_train_os, y_train_os,
+    #            id_='lr_complete_sampling')
 
 
 if __name__ == '__main__':
