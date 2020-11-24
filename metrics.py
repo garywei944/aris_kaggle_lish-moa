@@ -32,7 +32,7 @@ def eval_model(model, X_train, y_train, id_=None):
     print('*' * 20)
     print("Evaluating model {}".format(id_ if id_ else model))
 
-    n_splits = 1
+    n_splits = 3
     output = None
     if id_:
         output = Path('output') / id_
@@ -66,9 +66,9 @@ def eval_model(model, X_train, y_train, id_=None):
         f1 += f1_val
         break
 
-    log_loss_ /= n_splits
-    auc /= n_splits
-    f1 /= n_splits
+    # log_loss_ /= n_splits
+    # auc /= n_splits
+    # f1 /= n_splits
     if id_:
         pickle.dump((log_loss_, auc, f1), open(output / 'val.pkl', 'wb'))
     print("The Average Log Loss is {}".format(log_loss_))

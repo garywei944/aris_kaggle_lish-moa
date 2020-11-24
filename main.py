@@ -17,20 +17,26 @@ from MultiOutputWithSampling import MultiOutputWithSampling
 def main():
     X_train, X_test, y_train = load_and_process()
 
-    # PCA with 200 genes and 50 cells
-    train_features, test_features = pca(X_train, X_test)
-
-    # Linear Model
-    eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train,
+    # Without PCA
+    eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), X_train, y_train,
                id_='lr_no_sampling')
-    eval_model(MultiOutputWithSampling(LogisticRegression(max_iter=1e4)), train_features,
+    eval_model(MultiOutputWithSampling(LogisticRegression(max_iter=1e4)), X_train,
                y_train, id_='lr_separate_sampling')
     eval_model(MultiOutputWithSampling(
-        RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)), train_features,
-        y_train, id_='rf_200_10_43_10_no_sampling')
+        RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)),
+        X_train, y_train, id_='rf_200_10_43_10_separate_sampling')
 
-    # PCA with 500 genes and 75 cells
-    # TODO
+    # Tuning on PCA
+    for n_genes in [100, 200, 400, 500]:
+        for n_cells in [25, 50, 75]:
+            train_features, test_features = pca(X_train, X_test, n_genes, n_cells)
+            eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train,
+                       id_='{}_{}_lr_no_sampling'.format(n_genes, n_cells))
+            eval_model(MultiOutputWithSampling(LogisticRegression(max_iter=1e4)), train_features,
+                       y_train, id_='{}_{}_lr_separate_sampling'.format(n_genes, n_cells))
+            eval_model(MultiOutputWithSampling(
+                RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)),
+                train_features, y_train, id_='{}_{}_rf_200_10_43_10_separate_sampling'.format(n_genes, n_cells))
 
     # Failed since the generated data only contains label 0
     # # Oversampling on the entire dataset with MLSMOTE
