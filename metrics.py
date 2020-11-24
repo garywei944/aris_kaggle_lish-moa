@@ -44,7 +44,7 @@ def eval_model(model, X_train, y_train, id_=None):
             print("The Average f1 is {}".format(f1))
             return log_loss_, auc, f1
 
-    kf = KFold(n_splits=3)
+    kf = KFold(n_splits=n_splits)
     kf.get_n_splits(X_train)
 
     log_loss_, auc, f1 = 0.0, 0.0, 0.0

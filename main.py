@@ -8,6 +8,7 @@ from config import config
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
+from sklearn.neural_network import MLPClassifier
 
 from preprocess import load_and_process, pca, mlsmote
 from metrics import eval_model
@@ -25,6 +26,7 @@ def main():
     eval_model(MultiOutputWithSampling(
         RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)),
         X_train, y_train, id_='rf_200_10_43_10_separate_sampling')
+    eval_model(MLPClassifier(random_state=1, max_iter=1500), X_train, y_train, id_='mlp_1')
 
     # Tuning on PCA
     for n_genes in [100, 200, 400, 500]:
