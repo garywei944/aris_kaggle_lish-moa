@@ -1,10 +1,7 @@
 import numpy as np
-import pandas as pd
 
-from sklearn.linear_model import LogisticRegression
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.model_selection import KFold
 from sklearn.metrics import roc_auc_score, log_loss, f1_score
+from skmultilearn.model_selection import IterativeStratification
 
 import logging
 import pickle
@@ -30,8 +27,8 @@ def scorer(y_true, y_pred):
 
 def eval_model(model, X_train, y_train, id_=None):
     start_time = time()
-    print('*' * 20)
-    print("Evaluating model {}".format(id_ if id_ else model))
+    logging.info('*' * 20)
+    logging.info("Evaluating model {}".format(id_ if id_ else model))
 
     n_splits = 3
     output = None
@@ -42,17 +39,20 @@ def eval_model(model, X_train, y_train, id_=None):
         output.mkdir(parents=True, exist_ok=True)
         if path.exists(output / 'val.pkl'):
             logging.debug("Loading result from disk")
-            log_loss_, auc, f1 = pickle.load(open(output / 'val.pkl', 'rb'))
-            print("The Average Log Loss is {}".format(log_loss_))
-            print("The Average AUC is {}".format(auc))
-            print("The Average f1 is {}".format(f1))
+            log_loss_, auc, f1 = pickle.load(open(output / 'score.pkl', 'rb'))
+            logging.info("The Average Log Loss is {}".format(log_loss_))
+            logging.info("The Average AUC is {}".format(auc))
+            logging.info("The Average f1 is {}".format(f1))
             return log_loss_, auc, f1
 
-    kf = KFold(n_splits=n_splits)
-    kf.get_n_splits(X_train)
+    # Deprecated sklearn k-forld
+    # kf = StratifiedKFold(n_splits=n_splits)
+    # kf.get_n_splits(X_train)
+
+    kf = IterativeStratification(n_splits=3, order=1)
 
     log_loss_, auc, f1 = 0.0, 0.0, 0.0
-    for train_index, test_index in kf.split(X_train):
+    for i, (train_index, test_index) in enumerate(kf.split(X_train, y_train)):
         X_train_, X_val_ = X_train.iloc[train_index].values, X_train.iloc[test_index].values
         y_train_, y_val_ = y_train.iloc[train_index].values, y_train.iloc[test_index].values
 
@@ -60,25 +60,26 @@ def eval_model(model, X_train, y_train, id_=None):
         X_train_ = np.vstack((X_train_, np.zeros((1, X_train_.shape[1]))))
         y_train_ = np.vstack((y_train_, np.ones((1, y_train_.shape[1]))))
 
-        logging.debug(y_train_)
         model.fit(X_train_, y_train_)
         y_pred_ = model.predict(X_val_)
-        pickle.dump(y_pred_, open("{}_y_pred.pkl".format(id_), 'wb'))
         log_loss_val, auc_val, f1_val = scorer(y_val_, y_pred_)
+
+        # Pickle y_val_ and y_pred_
+        if id_:
+            pickle.dump((y_val_, y_pred_), open(output / "val_{}.pkl".format(i), 'wb'))
 
         # Update the scores
         log_loss_ += log_loss_val
         auc += auc_val
         f1 += f1_val
-        break
 
-    # log_loss_ /= n_splits
-    # auc /= n_splits
-    # f1 /= n_splits
+    log_loss_ /= n_splits
+    auc /= n_splits
+    f1 /= n_splits
     if id_:
-        pickle.dump((log_loss_, auc, f1), open(output / 'val.pkl', 'wb'))
-    print("The Average Log Loss is {}".format(log_loss_))
-    print("The Average AUC is {}".format(auc))
-    print("The Average f1 is {}".format(f1))
-    print("Used {:.2f}s".format(time() - start_time))
+        pickle.dump((log_loss_, auc, f1), open(output / 'score.pkl', 'wb'))
+    logging.info("The Average Log Loss is {}".format(log_loss_))
+    logging.info("The Average AUC is {}".format(auc))
+    logging.info("The Average f1 is {}".format(f1))
+    logging.info("Used {:.2f}s".format(time() - start_time))
     return log_loss_, auc, f1
