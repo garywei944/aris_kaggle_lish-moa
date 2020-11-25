@@ -6,6 +6,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.model_selection import KFold
 from sklearn.metrics import roc_auc_score, log_loss, f1_score
 
+import logging
 import pickle
 from time import time
 from pathlib import Path
@@ -34,10 +35,13 @@ def eval_model(model, X_train, y_train, id_=None):
 
     n_splits = 3
     output = None
+
+    # Try to load saved result from disk if exists
     if id_:
         output = Path('output') / id_
         output.mkdir(parents=True, exist_ok=True)
         if path.exists(output / 'val.pkl'):
+            logging.debug("Loading result from disk")
             log_loss_, auc, f1 = pickle.load(open(output / 'val.pkl', 'rb'))
             print("The Average Log Loss is {}".format(log_loss_))
             print("The Average AUC is {}".format(auc))
@@ -56,9 +60,12 @@ def eval_model(model, X_train, y_train, id_=None):
         X_train_ = np.vstack((X_train_, np.zeros((1, X_train_.shape[1]))))
         y_train_ = np.vstack((y_train_, np.ones((1, y_train_.shape[1]))))
 
+        logging.debug(y_train_)
         model.fit(X_train_, y_train_)
         y_pred_ = model.predict(X_val_)
         log_loss_val, auc_val, f1_val = scorer(y_pred_, y_val_)
+
+        pickle.dump(y_pred_, open("{}_y_pred.pkl".format(id_), 'wb'))
 
         # Update the scores
         log_loss_ += log_loss_val
