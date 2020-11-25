@@ -37,7 +37,7 @@ def eval_model(model, X_train, y_train, id_=None):
     if id_:
         output = Path('output') / id_
         output.mkdir(parents=True, exist_ok=True)
-        if path.exists(output / 'val.pkl'):
+        if path.exists(output / 'score.pkl'):
             logging.debug("Loading result from disk")
             log_loss_, auc, f1 = pickle.load(open(output / 'score.pkl', 'rb'))
             logging.info("The Average Log Loss is {}".format(log_loss_))

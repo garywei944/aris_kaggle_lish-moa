@@ -48,7 +48,7 @@ def _over_sampling(X_train, y_train, sampling_strategy=0.2):
         # logging.debug(y_train)
         y_train = np.hstack((y_train, np.ones(6)))
 
-    oversample = SMOTE(sampling_strategy=sampling_strategy, n_jobs=-1)
+    oversample = SMOTE(sampling_strategy=sampling_strategy)
     X, y = oversample.fit_resample(X_train, y_train)
     return X, y
 
