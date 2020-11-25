@@ -10,7 +10,6 @@ from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, StackingClassifier
 from sklearn.multioutput import MultiOutputClassifier, MultiOutputRegressor, MultiOutputEstimator
 from sklearn.neural_network import MLPClassifier
-
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
@@ -22,44 +21,44 @@ from MultiOutputWithSampling import MultiOutputWithSampling
 def main():
     X_train, X_test, y_train = load_and_process()
 
-    # # Without PCA
-    # # LR no sampling
-    # eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), X_train, y_train,
-    #            id_='lr_no_sampling')
-    # # LR separate over sampling
-    # eval_model(MultiOutputWithSampling(LogisticRegression(max_iter=1e4)), X_train,
-    #            y_train, id_='lr_separate_sampling')
-    # # Random Forest no sampling
-    # eval_model(RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10), X_train,
-    #            y_train, id_='rf_200_10_43_10_no_sampling')
-    # # Random Forest separate sampling
-    # eval_model(MultiOutputWithSampling(
-    #     RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)),
-    #     X_train, y_train, id_='rf_200_10_43_10_separate_sampling')
-    # # NN no sampling
-    # eval_model(MLPClassifier(random_state=1, max_iter=1500), X_train, y_train, id_='mlp_1')
-    #
-    # # Tuning on PCA
-    # for n_genes in [100, 200, 400, 500]:
-    #     for n_cells in [25, 50, 75]:
-    #         train_features, test_features = pca(X_train, X_test, n_genes, n_cells)
-    #         # LR no sampling
-    #         eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train,
-    #                    id_='{}_{}_lr_no_sampling'.format(n_genes, n_cells))
-    #         # LR no sampling C=0.01
-    #         eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train,
-    #                    id_='{}_{}_c_0.01_lr_no_sampling'.format(n_genes, n_cells))
-    #         # LR separate sampling
-    #         eval_model(MultiOutputWithSampling(LogisticRegression(max_iter=1e4)), train_features,
-    #                    y_train, id_='{}_{}_lr_separate_sampling'.format(n_genes, n_cells))
-    #         # Random Forest no sampling
-    #         eval_model(RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10,
-    #                                           n_jobs=-1), train_features, y_train,
-    #                    id_='{}_{}_rf_200_10_43_10_no_sampling'.format(n_genes, n_cells))
-    #         # Random Forest separate sampling
-    #         eval_model(MultiOutputWithSampling(
-    #             RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)),
-    #             train_features, y_train, id_='{}_{}_rf_200_10_43_10_separate_sampling'.format(n_genes, n_cells))
+    # Without PCA
+    # LR no sampling
+    eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), X_train, y_train,
+               id_='lr_no_sampling')
+    # LR separate over sampling
+    eval_model(MultiOutputWithSampling(LogisticRegression(max_iter=1e4)), X_train,
+               y_train, id_='lr_separate_sampling')
+    # Random Forest no sampling
+    eval_model(RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10), X_train,
+               y_train, id_='rf_200_10_43_10_no_sampling')
+    # Random Forest separate sampling
+    eval_model(MultiOutputWithSampling(
+        RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)),
+        X_train, y_train, id_='rf_200_10_43_10_separate_sampling')
+    # NN no sampling
+    eval_model(MLPClassifier(random_state=1, max_iter=1500), X_train, y_train, id_='mlp_1')
+
+    # Tuning on PCA
+    for n_genes in [100, 200, 400, 500]:
+        for n_cells in [25, 50, 75]:
+            train_features, test_features = pca(X_train, X_test, n_genes, n_cells)
+            # LR no sampling
+            eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train,
+                       id_='{}_{}_lr_no_sampling'.format(n_genes, n_cells))
+            # LR no sampling C=0.01
+            eval_model(MultiOutputClassifier(LogisticRegression(max_iter=1e4), n_jobs=-1), train_features, y_train,
+                       id_='{}_{}_c_0.01_lr_no_sampling'.format(n_genes, n_cells))
+            # LR separate sampling
+            eval_model(MultiOutputWithSampling(LogisticRegression(max_iter=1e4)), train_features,
+                       y_train, id_='{}_{}_lr_separate_sampling'.format(n_genes, n_cells))
+            # Random Forest no sampling
+            eval_model(RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10,
+                                              n_jobs=-1), train_features, y_train,
+                       id_='{}_{}_rf_200_10_43_10_no_sampling'.format(n_genes, n_cells))
+            # Random Forest separate sampling
+            eval_model(MultiOutputWithSampling(
+                RandomForestClassifier(n_estimators=200, max_depth=10, random_state=43, min_samples_split=10)),
+                train_features, y_train, id_='{}_{}_rf_200_10_43_10_separate_sampling'.format(n_genes, n_cells))
 
     # Use n_genes=200 n_cells=50 as best PCA
     train_features, test_features = pca(X_train, X_test, 200, 50)
@@ -103,4 +102,4 @@ def main():
 
 if __name__ == '__main__':
     config()
-main()
+    main()

@@ -24,7 +24,7 @@ def scorer(y_true, y_pred):
     for i in range(v):
         log_loss_ += log_loss(y_true[:, i], y_pred[:, i])
         auc += roc_auc_score(y_true[:, i], y_pred[:, i])
-        f1 += f1_score(y_true[:, i], y_pred[:, i])
+        f1 += f1_score(y_true[:, i], y_pred[:, i] > 0.5)
     return log_loss_ / v, auc / v, f1 / v
 
 
@@ -63,9 +63,8 @@ def eval_model(model, X_train, y_train, id_=None):
         logging.debug(y_train_)
         model.fit(X_train_, y_train_)
         y_pred_ = model.predict(X_val_)
-        log_loss_val, auc_val, f1_val = scorer(y_pred_, y_val_)
-
         pickle.dump(y_pred_, open("{}_y_pred.pkl".format(id_), 'wb'))
+        log_loss_val, auc_val, f1_val = scorer(y_val_, y_pred_)
 
         # Update the scores
         log_loss_ += log_loss_val
