@@ -8,6 +8,10 @@ import pickle
 from time import time
 from pathlib import Path
 from os import path
+import matplotlib.pyplot as plt
+
+mpl_logger = logging.getLogger('matplotlib')
+mpl_logger.setLevel(logging.WARNING)
 
 
 def scorer(y_true, y_pred):
@@ -62,6 +66,7 @@ def eval_model(model, X_train, y_train, id_=None):
 
         model.fit(X_train_, y_train_)
         y_pred_ = model.predict(X_val_)
+
         log_loss_val, auc_val, f1_val = scorer(y_val_, y_pred_)
 
         # Pickle y_val_ and y_pred_
@@ -83,3 +88,43 @@ def eval_model(model, X_train, y_train, id_=None):
     logging.info("The Average f1 is {}".format(f1))
     logging.info("Used {:.2f}s".format(time() - start_time))
     return log_loss_, auc, f1
+
+
+def make_hist_plot(df, title, id_):
+    def __plot(score):
+        logging.debug(df[score])
+        x = list(df.index)
+        y = df[score].values
+        plt.figure(figsize=(16, 9))
+        plt.bar(x, y)
+        plt.xticks(x, x, rotation='vertical')
+        plt.ylabel(score)
+        plt.title("{} {}".format(title, score))
+        plt.subplots_adjust(bottom=0.35)
+
+        plt.savefig("{}_{}.png".format(id_, score))
+        plt.show()
+
+    for col in df:
+        __plot(col)
+
+
+def make_plot(df, title, id_, x_label=None, log_x=False):
+    def __plot(score):
+        logging.debug(df[score])
+        x = list(df.index)
+        y = df[score].values
+        # plt.figure(figsize=(16, 9))
+        plt.plot(x, y)
+        if x_label:
+            plt.xlabel(x_label)
+        plt.ylabel(score)
+        if log_x:
+            plt.xscale('log')
+        plt.title("{} {}".format(title, score))
+
+        plt.savefig("{}_{}.png".format(id_, score))
+        plt.show()
+
+    for col in df:
+        __plot(col)

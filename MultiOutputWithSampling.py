@@ -54,10 +54,11 @@ def _over_sampling(X_train, y_train, sampling_strategy=0.2):
 
 
 class MultiOutputWithSampling:
-    def __init__(self, model, sampling_strategy=0.2):
+    def __init__(self, model, sampling_strategy=0.2, n_jobs=None):
         self.model = model
         self.list_ = None
         self.sampling_strategy = sampling_strategy
+        self.n_jobs = n_jobs
 
     def fit(self, X_train, y_train):
         v = y_train.shape[1]
@@ -71,7 +72,7 @@ class MultiOutputWithSampling:
             X, y = _over_sampling(X_train, y_train[:, i], self.sampling_strategy)
             pickle.dump((model_, X, y), open('arg_{}.pkl'.format(ids[i]), 'wb'))
 
-        pool = Pool(None)
+        pool = Pool(self.n_jobs)
         pool.map(_mp_fit, zip(ids, range(v)))
         pool.close()
         pool.join()
